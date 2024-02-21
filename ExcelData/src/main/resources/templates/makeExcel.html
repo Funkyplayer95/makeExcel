@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Data</title>
+    <style>
+        table { width: 90%; margin: 0 auto;}
+        th, td { padding: 10px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+<h1>All Data</h1>
+<div>
+<form action="/check" method="get">
+    <button type="submit" >조회하기</button>
+</form>
+
+<button onclick="add_row()">추가</button>
+<button onclick="save_data()">저장</button>
+<button onclick="delete_row()">삭제</button>
+
+<form action="/download" method="post">
+    <button type="submit" >엑셀 다운로드</button>
+</form>
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <input type="submit" value="파일첨부"/>
+</form>
+</div>
+<table id="data_table">
+    <thead>
+    <tr>
+        <th>옷 코드</th>
+        <th>옷 종류</th>
+        <th>옷 가격</th>
+        <th>판매 수량</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="data : ${allData}">
+        <td><input type="checkbox" id="delete" value="${data.code}"></td>
+        <td th:text="${data.code}"></td>
+        <td th:text="${data.name}"></td>
+        <td th:text="${data.price}+' 원'"></td>
+        <td th:text="${data.salesQ}"></td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    function add_row() {
+        var table = document.getElementById("data_table");
+        var row = table.insertRow(-1);
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        var cell3 = row.insertCell(2);
+        var cell4 = row.insertCell(3);
+        cell1.innerHTML = '<input type="text" id="newCode">';
+        cell2.innerHTML = '<input type="text" id="newName">';
+        cell3.innerHTML = '<input type="text" id="newPrice">';
+        cell4.innerHTML = '<input type="text" id="newSalesQ">';
+    }
+
+    function save_data() {
+    var newCode = document.getElementById("newCode").value;
+    var newName = document.getElementById("newName").value;
+    var newPrice = document.getElementById("newPrice").value;
+    var newSalesQ = document.getElementById("newSalesQ").value;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/save", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify({code: newCode, name: newName, price: newPrice, salesQ: newSalesQ}));
+    }
+
+    function delete_row() {
+    var check = document.getElementsById("delete");
+    var deleteValue = [];
+    for (var i = 0; i < check.length; i++) {
+        if (check[i].checked) {
+            deleteValue.push(check[i].value);
+        }
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/delete", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify(deleteValue));
+    }
+
+</script>
+</body>
+</html>
