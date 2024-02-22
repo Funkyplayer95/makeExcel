@@ -30,6 +30,7 @@
 <table id="data_table">
     <thead>
     <tr>
+        <th>체크</th>
         <th>옷 코드</th>
         <th>옷 종류</th>
         <th>옷 가격</th>
@@ -38,7 +39,7 @@
     </thead>
     <tbody>
     <tr th:each="data : ${allData}">
-        <td><input type="checkbox" id="delete" value="${data.code}"></td>
+        <td><input type="checkbox" class="delete" th:value="${data.code}"></td>
         <td th:text="${data.code}"></td>
         <td th:text="${data.name}"></td>
         <td th:text="${data.price}+' 원'"></td>
@@ -46,18 +47,22 @@
     </tr>
     </tbody>
 </table>
+
+
 <script>
     function add_row() {
         var table = document.getElementById("data_table");
-        var row = table.insertRow(-1);
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
-        var cell4 = row.insertCell(3);
-        cell1.innerHTML = '<input type="text" id="newCode">';
-        cell2.innerHTML = '<input type="text" id="newName">';
-        cell3.innerHTML = '<input type="text" id="newPrice">';
-        cell4.innerHTML = '<input type="text" id="newSalesQ">';
+        var row = table.insertRow(-1); // -1 = 마지막행
+        var cell1 = row.insertCell(0); // 1번째 열
+        var cell2 = row.insertCell(1); // 2번째 열
+        var cell3 = row.insertCell(2); // 3번째 열
+        var cell4 = row.insertCell(3); // 4번째 열
+        var cell5 = row.insertCell(4); // 5번째 열
+        cell1.innerHTML = '<input type="checkbox" class="delete" th:value="${data.code}">'; // 체크박스 만들기
+        cell2.innerHTML = '<input type="text" id="newCode">'; // code 입력 란
+        cell3.innerHTML = '<input type="text" id="newName">'; // name 입력 란
+        cell4.innerHTML = '<input type="text" id="newPrice">'; // price 입력 란
+        cell5.innerHTML = '<input type="text" id="newSalesQ">'; // salesQ 입력 란
     }
 
     function save_data() {
@@ -66,24 +71,24 @@
     var newPrice = document.getElementById("newPrice").value;
     var newSalesQ = document.getElementById("newSalesQ").value;
 
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/save", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify({code: newCode, name: newName, price: newPrice, salesQ: newSalesQ}));
+    var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
+    xhr.open("POST", "/save", true); // post방식으로 , /save를 찾아서 / 비동기 요청 보냄
+    xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보냄
+    xhr.send(JSON.stringify({code: newCode, name: newName, price: newPrice, salesQ: newSalesQ})); // 키 : 값 형식으로 보냄.
     }
 
     function delete_row() {
-    var check = document.getElementsById("delete");
-    var deleteValue = [];
-    for (var i = 0; i < check.length; i++) {
-        if (check[i].checked) {
-            deleteValue.push(check[i].value);
+    var check = document.getElementsByClassName("delete");
+    var deleteValue = []; // 배열 생성
+    for (var i = 0; i < check.length; i++) {  // check 배열 길이만큼 반복
+        if (check[i].checked) { // [i]번째에 체크가 되었다면
+            deleteValue.push(check[i].value); // deleteValue배열에 value값을 추가
         }
     }
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/delete", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send(JSON.stringify(deleteValue));
+    var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
+    xhr.open("POST", "/delete", true); // post방식, /delete, 비동기 요청 보냄
+    xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보낸다.
+    xhr.send(JSON.stringify(deleteValue)); // deleteValue 배열을 json 문자열로 변환 후 서버에 보냄.
     }
 
 </script>
