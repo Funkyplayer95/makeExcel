@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import makeExcel.ExcelData.DTO.DataDTO;
 import makeExcel.ExcelData.Entity.Data;
 import makeExcel.ExcelData.Repository.DataRepository;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,7 +42,7 @@ public class DataService {
     } // count를 사용해서 데이터 개수를 가져온다
 
 
-    public DataDTO saveData(DataDTO dataDTO){
+    public void saveData(DataDTO dataDTO){
         Data data = new Data(); // 새로운 Data 객체 생성
 
         data.setCode(dataDTO.getCode()); // DTO에 저장된 code를 entity에 set함
@@ -50,10 +52,27 @@ public class DataService {
 
         data = dataRepository.save(data); // update할 수 있도록 save문을 사용.
 
-        return new DataDTO(data.getCode(), data.getName(), data.getPrice(),data.getSalesQ());
+        new DataDTO(data.getCode(), data.getName(), data.getPrice(), data.getSalesQ());
         // 저장된 데이터를 이용, 새로운 DTO객체를 생성하고 반환. 클라이언트에게 저장된 데이터의 정보를 전달.
     }
     public void deleteData(String id) {
         dataRepository.deleteById(id); // 인자로 받은 id값을 찾아서 데이터베이스에서 삭제.
     }
+
+    public void uploadData(MultipartFile file) throws IOException {
+
+        Workbook workbook = WorkbookFactory.create(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+
+        for(Row row : sheet) {
+            Data data = new Data();
+            data.setCode((int) row.getCell(0).getNumericCellValue());
+            data.setName(row.getCell(1).getStringCellValue());
+            data.setPrice((int) row.getCell(2).getNumericCellValue());
+            data.setSalesQ((int) row.getCell(3).getNumericCellValue());
+
+            dataRepository.save(data);
+        }
+    }
+
 }

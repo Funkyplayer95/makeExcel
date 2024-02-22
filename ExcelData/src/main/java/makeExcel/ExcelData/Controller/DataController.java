@@ -10,6 +10,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,9 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -29,11 +31,11 @@ public class DataController {
     private final DataService dataService;
 
     @GetMapping("/") // 기본 페이지 이동
-    public String allDataList(Model model){
+    public String allDataList(){
         return "makeExcel";
     } //html로 입장
 
-    @GetMapping("/check") // 조회버튼 클릭시
+    @PostMapping("/check") // 조회버튼 클릭시
     public String dataCheck(Model model){
         List<DataDTO> allData = dataService.getAllItemData(); // 모든 데이터를 가져온다.
         model.addAttribute("allData", allData); // "allData"라는 명칭에 주입
@@ -41,17 +43,27 @@ public class DataController {
     }
 
     @PostMapping("/save") // 저장버튼 클릭 시,
-    public String addData(@RequestBody DataDTO newData) { //@RequestBody는 html에서 보내는 데이터를 받는다
-        dataService.saveData(newData); //받은 데이터들을 save 진행.
-        return "makeExcel";
+    public String addData(@RequestBody DataDTO newData, RedirectAttributes redirectAttributes) { //@RequestBody는 html에서 보내는 데이터를 받는다
+        try {
+            dataService.saveData(newData); //받은 데이터들을 save 진행.
+            redirectAttributes.addFlashAttribute("message", "저장 성공");
+            return "redirect:/";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", "저장 실패. 오류 : " + e.getMessage());
+            return "redirect:/";
+        }
     }
 
     @PostMapping("/delete") // 삭제 버튼 클릭 시, 삭제하는 value를 가진 리스트를 받아온다. []로 받은 delete할 값들 받기
-    public String deleteData(@RequestBody List<String> codesToDelete) {
-        for (String code : codesToDelete) { //리스트 안에 있는 value값을 조회
-            dataService.deleteData(code); // 삭제하도록 진행.
+    public ResponseEntity<String> deleteData(@RequestBody List<String> codesToDelete, RedirectAttributes redirectAttributes) {
+        try {
+            for (String code : codesToDelete) { //리스트 안에 있는 value값을 조회
+                dataService.deleteData(code); // 삭제하도록 진행.
+            }
+            return ResponseEntity.ok("삭제 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패. 오류 : " + e.getMessage());
         }
-        return "redirect:/";
     }
 
     @PostMapping("/download") // 엑셀 다운로드 버튼 누를 시
@@ -61,8 +73,8 @@ public class DataController {
 
         Workbook wb = new XSSFWorkbook(); // XSSFWorkbook 객체를 생성해서 wb에 저장. 엑셀파일 생성하는데 사용.
         Sheet sheet = wb.createSheet("첫번째 시트"); // 엑셀 시트를 생성. 이름을 ()로 저장.
-        Row row = null; // 엑셀의 행
-        Cell cell = null; // 엑셀의 열
+        Row row; // 엑셀의 행
+        Cell cell; // 엑셀의 열
         int rowNum = 0; // 행 번호
 
         row = sheet.createRow(rowNum++); // 첫 번째 행 생성.
@@ -94,36 +106,20 @@ public class DataController {
     }
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file) {
-        try {
-            List<DataDTO> dataDTOs = readExcelFile(file);
-            for (DataDTO dataDTO : dataDTOs) {
-                dataService.saveData(dataDTO);
+    public String uploadExcel(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes){
+        try{
+            if(!file.getOriginalFilename().endsWith(".xls") && !file.getOriginalFilename().endsWith(".xlsx")){
+                redirectAttributes.addFlashAttribute("message","엑셀 파일만 업로드 가능합니다.");
+                return "redirect:/";
             }
+
+            dataService.uploadData(file);
+            redirectAttributes.addFlashAttribute("message","업로드 성공");
         } catch (Exception e) {
-            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("message", "업로드 실패. 오류 : " + e.getMessage());
+
         }
         return "redirect:/";
     }
 
-    private List<DataDTO> readExcelFile(MultipartFile file) throws IOException {
-        List<DataDTO> dataDTOs = new ArrayList<>();
-
-        Workbook workbook = new XSSFWorkbook(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
-
-        for (Row currentRow : sheet) {
-            int code = (int) currentRow.getCell(0).getNumericCellValue();
-            String name = currentRow.getCell(1).getStringCellValue();
-            int price = (int) currentRow.getCell(2).getNumericCellValue();
-            int salesQ = (int) currentRow.getCell(3).getNumericCellValue();
-
-            DataDTO dataDTO = new DataDTO(code, name, price, salesQ);
-            dataDTOs.add(dataDTO);
-        }
-
-        workbook.close();
-
-        return dataDTOs;
-    }
 }

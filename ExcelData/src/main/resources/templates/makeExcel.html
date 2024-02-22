@@ -10,7 +10,7 @@
 <body>
 <h1>All Data</h1>
 <div>
-<form action="/check" method="get">
+<form action="/check" method="post">
     <button type="submit" >조회하기</button>
 </form>
 
@@ -23,9 +23,10 @@
 </form>
 
 <form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file">
+    <input type="file" name="file" accept=".xls,.xlsx"> <!--엑셀파일만 선택할 수 있도록-->
     <input type="submit" value="파일첨부"/>
 </form>
+
 </div>
 <table id="data_table">
     <thead>
@@ -39,7 +40,7 @@
     </thead>
     <tbody>
     <tr th:each="data : ${allData}">
-        <td><input type="checkbox" class="delete" th:value="${data.code}"></td>
+        <td><input type="checkbox" class="delete" th:value="${data.code}" required></td>
         <td th:text="${data.code}"></td>
         <td th:text="${data.name}"></td>
         <td th:text="${data.price}+' 원'"></td>
@@ -48,6 +49,14 @@
     </tbody>
 </table>
 
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var message = /*[[${message}]]*/ ;
+
+    if (message) { alert(message); }
+
+    /*]]>*/
+</script>
 
 <script>
     function add_row() {
