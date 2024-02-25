@@ -3,6 +3,7 @@ package makeExcel.ExcelData.Controller;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import makeExcel.ExcelData.DTO.DataDTO;
+import makeExcel.ExcelData.Entity.Data;
 import makeExcel.ExcelData.Service.DataService;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -10,14 +11,9 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -41,29 +37,30 @@ public class DataController {
         model.addAttribute("allData", allData); // "allData"라는 명칭에 주입
         return "makeExcel";
     }
-
+    @ResponseBody
     @PostMapping("/save") // 저장버튼 클릭 시,
-    public String addData(@RequestBody DataDTO newData, RedirectAttributes redirectAttributes) { //@RequestBody는 html에서 보내는 데이터를 받는다
+    public String saveData(@RequestBody List<Data> codesToSave) { //@RequestBody는 html에서 보내는 데이터를 받는다
         try {
-            dataService.saveData(newData); //받은 데이터들을 save 진행.
-            redirectAttributes.addFlashAttribute("message", "저장 성공");
-            return "redirect:/";
+            for (Data data : codesToSave) { //리스트 안에 있는 value값을 조회
+                dataService.saveData(data); // 삭제하도록 진행.
+            }
+            return "makeExcel";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message", "저장 실패. 오류 : " + e.getMessage());
-            return "redirect:/";
+            return "makeExcel";
         }
     }
 
     @PostMapping("/delete") // 삭제 버튼 클릭 시, 삭제하는 value를 가진 리스트를 받아온다. []로 받은 delete할 값들 받기
-    public ResponseEntity<String> deleteData(@RequestBody List<String> codesToDelete, RedirectAttributes redirectAttributes) {
+    public String deleteData(@RequestBody List<String> codesToDelete) {
         try {
             for (String code : codesToDelete) { //리스트 안에 있는 value값을 조회
                 dataService.deleteData(code); // 삭제하도록 진행.
             }
-            return ResponseEntity.ok("삭제 성공");
+            return "makeExcel";
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패. 오류 : " + e.getMessage());
+            return "makeExcel";
         }
+
     }
 
     @PostMapping("/download") // 엑셀 다운로드 버튼 누를 시

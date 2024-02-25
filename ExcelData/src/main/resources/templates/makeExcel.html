@@ -1,105 +1,214 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>All Data</title>
+    <title>데이터 엑셀화</title>
     <style>
-        table { width: 90%; margin: 0 auto;}
-        th, td { padding: 10px; border: 1px solid #ddd; }
+        table {
+            width: 90%;
+            margin: 0 auto;
+            margin-bottom: 30px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .btnAll {
+            display: flex;
+            float: right;
+
+            align-items: center;
+        }
+
+        .btnAll>* {
+            margin-right: 5px;
+        }
+
+        .btnAll button,
+        .btnAll input[type="submit"] {
+            padding: 10px 20px;
+            /* 버튼 내부의 패딩을 설정 */
+            border: none;
+            /* 테두리 제거 */
+            border-radius: 5px;
+            /* 모서리 둥글게 */
+            background-color: #4CAF50;
+            /* 배경색 설정 */
+            color: white;
+            /* 글자색 설정 */
+            cursor: pointer;
+            /* 마우스 커서를 포인터로 변경 */
+            font-size: 16px;
+            /* 글자 크기 설정 */
+            transition: background-color 0.3s;
+            /* 배경색이 부드럽게 변경되도록 트랜지션 설정 */
+        }
+
+        .btnAll button:hover,
+        .btnAll input[type="submit"]:hover {
+            background-color: #45a049;
+            /* 마우스 오버시 배경색 변경 */
+        }
     </style>
 </head>
+
 <body>
-<h1>All Data</h1>
-<div>
-<form action="/check" method="post">
-    <button type="submit" >조회하기</button>
-</form>
+    <h1>상품 리스트</h1>
+    <div>
+        <div class="btnAll">
+            <form action="/check" method="post">
+                <button type="submit" id="searchBtn">조회하기</button>
+            </form>
 
-<button onclick="add_row()">추가</button>
-<button onclick="save_data()">저장</button>
-<button onclick="delete_row()">삭제</button>
+            <button onclick="add_row()">추가</button>
+            <button onclick="save_data()">저장</button>
+            <button onclick="delete_row()">삭제</button>
 
-<form action="/download" method="post">
-    <button type="submit" >엑셀 다운로드</button>
-</form>
+            <form action="/download" method="post">
+                <button type="submit">엑셀 다운로드</button>
+            </form>
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".xls,.xlsx"> <!--엑셀파일만 선택할 수 있도록-->
-    <input type="submit" value="파일첨부"/>
-</form>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept=".xls,.xlsx" value=""> <!--엑셀파일만 선택할 수 있도록-->
+                <input type="submit" value="파일첨부" />
+            </form>
+        </div>
+        <div>
+            <table id="data_table">
+                <thead>
+                    <tr>
+                        <th>체크</th>
+                        <th>옷 코드</th>
+                        <th>옷 종류</th>
+                        <th>옷 가격</th>
+                        <th>판매 수량</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="data : ${allData}">
+                        <td><input type="checkbox" class="checkValue" th:value="${data.code}" required></td>
+                        <td th:text="${data.code}"></td>
+                        <!-- <td> <input type="text" class="codeid" th:value="${data.code}" required></td> -->
+                        <td th:text="${data.name}"></td>
+                        <td th:text="${data.price}+' 원'"></td>
+                        <td th:text="${data.salesQ}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var message = /*[[${message}]]*/;
+        if (message) { alert(message); }
 
-</div>
-<table id="data_table">
-    <thead>
-    <tr>
-        <th>체크</th>
-        <th>옷 코드</th>
-        <th>옷 종류</th>
-        <th>옷 가격</th>
-        <th>판매 수량</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="data : ${allData}">
-        <td><input type="checkbox" class="delete" th:value="${data.code}" required></td>
-        <td th:text="${data.code}"></td>
-        <td th:text="${data.name}"></td>
-        <td th:text="${data.price}+' 원'"></td>
-        <td th:text="${data.salesQ}"></td>
-    </tr>
-    </tbody>
-</table>
+        /*]]>*/
+    </script>
 
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    var message = /*[[${message}]]*/ ;
-
-    if (message) { alert(message); }
-
-    /*]]>*/
-</script>
-
-<script>
-    function add_row() {
-        var table = document.getElementById("data_table");
-        var row = table.insertRow(-1); // -1 = 마지막행
-        var cell1 = row.insertCell(0); // 1번째 열
-        var cell2 = row.insertCell(1); // 2번째 열
-        var cell3 = row.insertCell(2); // 3번째 열
-        var cell4 = row.insertCell(3); // 4번째 열
-        var cell5 = row.insertCell(4); // 5번째 열
-        cell1.innerHTML = '<input type="checkbox" class="delete" th:value="${data.code}">'; // 체크박스 만들기
-        cell2.innerHTML = '<input type="text" id="newCode">'; // code 입력 란
-        cell3.innerHTML = '<input type="text" id="newName">'; // name 입력 란
-        cell4.innerHTML = '<input type="text" id="newPrice">'; // price 입력 란
-        cell5.innerHTML = '<input type="text" id="newSalesQ">'; // salesQ 입력 란
-    }
-
-    function save_data() {
-    var newCode = document.getElementById("newCode").value;
-    var newName = document.getElementById("newName").value;
-    var newPrice = document.getElementById("newPrice").value;
-    var newSalesQ = document.getElementById("newSalesQ").value;
-
-    var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
-    xhr.open("POST", "/save", true); // post방식으로 , /save를 찾아서 / 비동기 요청 보냄
-    xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보냄
-    xhr.send(JSON.stringify({code: newCode, name: newName, price: newPrice, salesQ: newSalesQ})); // 키 : 값 형식으로 보냄.
-    }
-
-    function delete_row() {
-    var check = document.getElementsByClassName("delete");
-    var deleteValue = []; // 배열 생성
-    for (var i = 0; i < check.length; i++) {  // check 배열 길이만큼 반복
-        if (check[i].checked) { // [i]번째에 체크가 되었다면
-            deleteValue.push(check[i].value); // deleteValue배열에 value값을 추가
+    <script>
+        function search() {
+            document.getElementById("searchBtn").submit();
+            //window.location.reload();
         }
-    }
-    var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
-    xhr.open("POST", "/delete", true); // post방식, /delete, 비동기 요청 보냄
-    xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보낸다.
-    xhr.send(JSON.stringify(deleteValue)); // deleteValue 배열을 json 문자열로 변환 후 서버에 보냄.
-    }
+        function add_row() {
+            var table = document.getElementById("data_table");
+            var rows = table.rows;
+            var newCode = 1;
 
-</script>
+            if (rows.length > 1) { // 테이블 헤더를 제외한 행이 있는지 확인
+                var lastRow = rows[rows.length - 1];
+                var lastCodeCell = lastRow.cells[1]; // 코드를 나타내는 셀을 참조
+                var lastCode = parseInt(lastCodeCell.innerText); // 마지막 행의 code 값을 가져옴
+                var newCodeInput = lastRow.querySelector('.newCode'); // 마지막 행의 newCode 입력 필드를 가져옴
+
+                if (newCodeInput) { // 추가 행이 있을 때
+                    newCode = parseInt(newCodeInput.value) + 1;
+                } else if (!isNaN(lastCode)) { // 추가 행이 없을 때
+                    newCode = lastCode + 1;
+                }
+            }
+
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+            var cell4 = row.insertCell(3);
+            var cell5 = row.insertCell(4);
+            cell1.innerHTML = '<input type="checkbox" class="checkValue" value="' + newCode + '" checked>';
+            cell2.innerHTML = '<input type="text" id="newCode" class="newCode" value="' + newCode + '" readOnly>';
+            cell3.innerHTML = '<input type="text" id="newName">';
+            cell4.innerHTML = '<input type="text" id="newPrice">';
+            cell5.innerHTML = '<input type="text" id="newSalesQ">';
+        }
+
+        function save_data() {
+            var check = document.getElementsByClassName("checkValue");
+            var saveValue = [];
+
+            for (var i = 0; i < check.length; i++) {  // check 배열 길이만큼 반복
+                if (check[i].checked) { // [i]번째에 체크가 되었다면
+                    var row = check[i].parentNode.parentNode; // 체크박스의 부모 노드(td)의 부모 노드(tr)를 찾음
+                    var cells = row.getElementsByTagName("td"); // row의 모든 cell을 가져옴
+
+                    var newCode = cells[1].querySelector('input').value; // 각 cell의 텍스트를 가져옴
+                    var newName = cells[2].querySelector('input').value;
+                    var newPrice = cells[3].querySelector('input').value;
+                    var newSalesQ = cells[4].querySelector('input').value;
+
+                    var data = { code: newCode, name: newName, price: newPrice, salesQ: newSalesQ };
+                    saveValue.push(data);
+                }
+            }
+
+            var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
+            xhr.open("POST", "/save", true); // post방식으로 , /save를 찾아서 / 비동기 요청 보냄
+            xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보냄
+            xhr.addEventListener("readystatechange", function (event) {
+                const { target } = event;
+                if (target.readyState == XMLHttpRequest.DONE) {
+                    const { state } = target;
+                    if (status == 0 || (status >= 200 && status < 400)) {
+                        alert("저장 완료");
+                        document.getElementById("searchBtn").click();
+                    } else {
+                        alert("저장 실패");
+                    }
+                }
+            })
+            xhr.send(JSON.stringify(saveValue));
+        }
+        function delete_row() {
+            var check = document.getElementsByClassName("checkValue");
+            var deleteValue = []; // 배열 생성
+            for (var i = 0; i < check.length; i++) {  // check 배열 길이만큼 반복
+                if (check[i].checked) { // [i]번째에 체크가 되었다면
+                    deleteValue.push(check[i].value); // deleteValue배열에 value값을 추가
+                }
+            }
+            var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
+            xhr.open("POST", "/delete", true); // post방식, /delete, 비동기 요청 보냄
+
+            xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보낸다.
+            xhr.addEventListener("readystatechange", function (event) {
+                const { target } = event;
+                if (target.readyState == XMLHttpRequest.DONE) {
+                    const { state } = target;
+                    if (status == 0 || (status >= 200 && status < 400)) {
+                        alert("삭제 완료");
+                        document.getElementById("searchBtn").click();
+
+                    } else {
+                        alert("삭제 실패");
+                    }
+                }
+            })
+            xhr.send(JSON.stringify(deleteValue)); // deleteValue 배열을 json 문자열로 변환 후 서버에 보냄.
+        }
+
+    </script>
 </body>
+
 </html>
