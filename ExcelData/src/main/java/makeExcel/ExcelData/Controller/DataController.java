@@ -26,7 +26,8 @@ public class DataController {
     @Autowired // 의존성 주입을 할때 사용하는 어노테이션
     private final DataService dataService;
 
-    @GetMapping("/") // 기본 페이지 이동
+
+    @PostMapping("/") // 기본 페이지 이동
     public String allDataList(){
         return "makeExcel";
     } //html로 입장
@@ -51,9 +52,9 @@ public class DataController {
     }
 
     @PostMapping("/delete") // 삭제 버튼 클릭 시, 삭제하는 value를 가진 리스트를 받아온다. []로 받은 delete할 값들 받기
-    public String deleteData(@RequestBody List<String> codesToDelete) {
+    public String deleteData(@RequestBody List<Integer> codesToDelete) {
         try {
-            for (String code : codesToDelete) { //리스트 안에 있는 value값을 조회
+            for (int code : codesToDelete) { //리스트 안에 있는 value값을 조회
                 dataService.deleteData(code); // 삭제하도록 진행.
             }
             return "makeExcel";
@@ -67,7 +68,6 @@ public class DataController {
     public void excelDownload(HttpServletResponse response) throws IOException { // throws IOException 예외처리
         long itemCount = dataService.countItems(); // 데이터의 총 개수를 반환해서 저장
         List<DataDTO> allData = dataService.getAllItemData(); // allData 안에 모든 데이터들을 저장
-
         Workbook wb = new XSSFWorkbook(); // XSSFWorkbook 객체를 생성해서 wb에 저장. 엑셀파일 생성하는데 사용.
         Sheet sheet = wb.createSheet("첫번째 시트"); // 엑셀 시트를 생성. 이름을 ()로 저장.
         Row row; // 엑셀의 행

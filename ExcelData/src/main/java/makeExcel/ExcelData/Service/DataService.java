@@ -23,6 +23,7 @@ public class DataService {
     @Autowired
     private final DataRepository dataRepository;
 
+
     public List<DataDTO> getAllItemData() {
         List<Data> data = dataRepository.findAll();// findAll로 모든것을 찾아 안에 넣는다.
         List<DataDTO> dataAll = new ArrayList<>(); // 새로운 리스트 객체를 생성
@@ -53,7 +54,7 @@ public class DataService {
 
         dataRepository.save(serverData);
     }
-    public void deleteData(String id) {
+    public void deleteData(int id) {
         dataRepository.deleteById(id); // 인자로 받은 id값을 찾아서 데이터베이스에서 삭제.
     }
 
