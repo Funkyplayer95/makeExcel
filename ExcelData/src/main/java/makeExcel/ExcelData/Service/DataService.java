@@ -17,10 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor //최종필드의 생성자를 만듬
 public class DataService {
 
-    @Autowired
+    @Autowired // 자동 종속성을 부여. bean이 생성될때 수동 구성의 필요성을 줄임.
     private final DataRepository dataRepository;
 
 
@@ -45,14 +45,14 @@ public class DataService {
     } // count를 사용해서 데이터 개수를 가져온다
 
 
-    public void saveData(Data serverData){
-        Data data = new Data();
-        data.setCode(serverData.getCode());
+    public void saveData(Data serverData){ // 데이터를 저장한다.
+        Data data = new Data(); // 새로운 data 객체를 생성
+        data.setCode(serverData.getCode()); // serverData의
         data.setName(serverData.getName());
         data.setPrice(serverData.getPrice());
         data.setSalesQ(serverData.getSalesQ());
 
-        dataRepository.save(serverData);
+        dataRepository.save(data);
     }
     public void deleteData(int id) {
         dataRepository.deleteById(id); // 인자로 받은 id값을 찾아서 데이터베이스에서 삭제.

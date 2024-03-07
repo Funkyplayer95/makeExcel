@@ -155,7 +155,6 @@
                 if (check[i].checked) { // [i]번째에 체크가 되었다면
                     var row = check[i].parentNode.parentNode; // 체크박스의 부모 노드(td)의 부모 노드(tr)를 찾음
                     var cells = row.getElementsByTagName("td"); // row의 모든 cell을 가져옴
-
                     var newCode = cells[1].querySelector('input').value; // 각 cell의 텍스트를 가져옴
                     var newName = cells[2].querySelector('input').value;
                     var newPrice = cells[3].querySelector('input').value;
@@ -165,7 +164,7 @@
                     saveValue.push(data);
                 }
             }
-
+            // 아래내용은 메세지를 보내기 위한 코드
             var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
             xhr.open("POST", "/save", true); // post방식으로 , /save를 찾아서 / 비동기 요청 보냄
             xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보냄
@@ -191,9 +190,9 @@
                     deleteValue.push(check[i].value); // deleteValue배열에 value값을 추가
                 }
             }
+            // 아래내용은 메세지를 보내기 위한 코드
             var xhr = new XMLHttpRequest(); // XMLHttpRequest객체를 생성
             xhr.open("POST", "/delete", true); // post방식, /delete, 비동기 요청 보냄
-
             xhr.setRequestHeader("Content-Type", "application/json"); // json방식으로 보낸다.
             xhr.addEventListener("readystatechange", function (event) {
                 const { target } = event;
