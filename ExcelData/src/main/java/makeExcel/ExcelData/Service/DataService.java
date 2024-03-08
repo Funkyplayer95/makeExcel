@@ -47,12 +47,12 @@ public class DataService {
 
     public void saveData(Data serverData){ // 데이터를 저장한다.
         Data data = new Data(); // 새로운 data 객체를 생성
-        data.setCode(serverData.getCode()); // serverData의
-        data.setName(serverData.getName());
-        data.setPrice(serverData.getPrice());
-        data.setSalesQ(serverData.getSalesQ());
+        data.setCode(serverData.getCode()); // 서버데이터의 code를 set한다
+        data.setName(serverData.getName()); // 서버데이터의 name을 set한다
+        data.setPrice(serverData.getPrice()); // 서버데이터의 price를 set한다
+        data.setSalesQ(serverData.getSalesQ()); // 서버데이터의 salesQ를 set한다
 
-        dataRepository.save(data);
+        dataRepository.save(data); // data를 저장한다.
     }
     public void deleteData(int id) {
         dataRepository.deleteById(id); // 인자로 받은 id값을 찾아서 데이터베이스에서 삭제.

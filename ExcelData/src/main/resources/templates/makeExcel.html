@@ -86,7 +86,6 @@
                     <tr th:each="data : ${allData}">
                         <td><input type="checkbox" class="checkValue" th:value="${data.code}" required></td>
                         <td th:text="${data.code}"></td>
-                        <!-- <td> <input type="text" class="codeid" th:value="${data.code}" required></td> -->
                         <td th:text="${data.name}"></td>
                         <td th:text="${data.price}+' 원'"></td>
                         <td th:text="${data.salesQ}"></td>
@@ -201,7 +200,6 @@
                     if (status == 0 || (status >= 200 && status < 400)) {
                         alert("삭제 완료");
                         document.getElementById("searchBtn").click();
-
                     } else {
                         alert("삭제 실패");
                     }

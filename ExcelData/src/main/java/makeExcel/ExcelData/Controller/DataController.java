@@ -39,12 +39,12 @@ public class DataController {
     }
     @ResponseBody
     @PostMapping("/save") // 저장버튼 클릭 시,
-    public String saveData(@RequestBody List<Data> codesToSave) { //@RequestBody는 html에서 보내는 데이터를 받는다
+    public String saveData(@RequestBody List<Data> codesToSave) { //@RequestBody는 json데이터를 받아온다. 여기서는  List<Data>형태로 받는다
         try {
-            for (Data data : codesToSave) { //리스트 안에 있는 value값을 조회
-                dataService.saveData(data); // 삭제하도록 진행.
+            for (Data data : codesToSave) { //리스트 안에 있는 value값을 조회하는 for-each문
+                dataService.saveData(data); // 서비스의 saveData로 적용
             }
-            return "makeExcel";
+            return "makeExcel"; 
         } catch (Exception e) {
             return "makeExcel";
         }
@@ -53,7 +53,7 @@ public class DataController {
     @PostMapping("/delete") // 삭제 버튼 클릭 시, 삭제하는 value를 가진 리스트를 받아온다. []로 받은 delete할 값들 받기
     public String deleteData(@RequestBody List<Integer> codesToDelete) {
         try {
-            for (int code : codesToDelete) { //리스트 안에 있는 value값을 조회
+            for (int code : codesToDelete) { //리스트 안에 있는 value값을 조회하는 for-each문
                 dataService.deleteData(code); // 삭제하도록 진행.
             }
             return "makeExcel";
